@@ -35,10 +35,10 @@ grafica_bonita <- function(data, x, y,
 
   theme_fuente <- if (!is.null(fuente)) ggplot2::element_text(family = fuente) else ggplot2::element_text()
 
-  # Asegurar que x es numérico para gráficos temporales
+  # Forzar año como numérico
   data <- data %>% dplyr::mutate(!!x := as.numeric(.data[[x]]))
 
-  # Crea columna para estimado/futuro si hay línea de corte
+  # Crear tipo_linea
   data_plot <- dplyr::mutate(data, tipo_linea = nombre_estimado)
 
   if (!is.null(linea_vertical)) {
@@ -64,32 +64,42 @@ grafica_bonita <- function(data, x, y,
     ) +
     ggplot2::scale_x_continuous(breaks = seq(min(data_plot[[x]], na.rm = TRUE),
                                              max(data_plot[[x]], na.rm = TRUE),
-                                             by = 2))
+                                             by = 2)) +
+    ggplot2::scale_color_manual(
+      values = c(
+        nombre_estimado = "#9F2241",
+        `Deseable (futuro)` = "#9F2241",
+        !!nombre_superior := "#027a35",
+        !!nombre_inferior := "#027a35"
+      )
+    )
 
-  # Línea vertical (opcional)
+  # Línea vertical opcional
   if (!is.null(linea_vertical)) {
     p <- p + ggplot2::geom_vline(xintercept = linea_vertical,
                                  linetype = "dashed", color = "red", linewidth = 1)
   }
 
-  # Intervalo superior
+  # Intervalos
   if (mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
     p <- p + ggplot2::geom_line(
       data = data,
       ggplot2::aes_string(x = x, y = "superior", colour = shQuote(nombre_superior)),
-      linetype = "dotted",
-      linewidth = 1.5
+      linetype = "dotted", linewidth = 1.5
     )
   }
 
-  # Intervalo inferior
   if (mostrar_intervalo %in% c("ambos", "inferior") && "inferior" %in% names(data)) {
     p <- p + ggplot2::geom_line(
       data = data,
       ggplot2::aes_string(x = x, y = "inferior", colour = shQuote(nombre_inferior)),
-      linetype = "dotted",
-      linewidth = 1.5
+      linetype = "dotted", linewidth = 1.5
     )
+  }
+
+  # Filtrar niveles no usados en la leyenda
+  if (!mostrar_leyenda) {
+    p <- p + ggplot2::theme(legend.position = "none")
   }
 
   return(p)
