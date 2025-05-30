@@ -1,20 +1,20 @@
-#' Gráfica de línea personalizada con intervalos
+#' Gráfico de línea con intervalos y personalización avanzada
 #'
-#' @param data Data frame con los datos
-#' @param x Variable para eje x (como string)
-#' @param y Variable principal del eje y (como string)
+#' @param data Data frame con las columnas necesarias
+#' @param x Variable del eje X (como string)
+#' @param y Variable principal del eje Y (como string)
 #' @param titulo Título del gráfico
-#' @param linea_vertical Año para separar observado/estimado (opcional)
-#' @param mostrar_intervalo Opciones: "ninguno", "ambos", "superior", "inferior"
-#' @param mostrar_leyenda Mostrar leyenda (TRUE/FALSE)
-#' @param nombre_estimado Nombre a mostrar para la línea estimada
-#' @param nombre_superior Nombre a mostrar para la línea superior
-#' @param nombre_inferior Nombre a mostrar para la línea inferior
-#' @param fuente Tipo de letra (nombre de Google Font cargada con showtext)
-#' @param etiqueta_x Etiqueta eje x
-#' @param etiqueta_y Etiqueta eje y
+#' @param linea_vertical Valor numérico opcional donde se dibuja una línea vertical
+#' @param mostrar_intervalo Opciones: "ninguno", "superior", "inferior", "ambos"
+#' @param nombre_observado Etiqueta para la línea antes de la línea vertical
+#' @param nombre_estimado_futuro Etiqueta para la línea después de la línea vertical
+#' @param nombre_intervalo_superior Etiqueta para la línea del intervalo superior
+#' @param nombre_intervalo_inferior Etiqueta para la línea del intervalo inferior
+#' @param mostrar_leyenda Lógico. Mostrar leyenda (TRUE/FALSE)
+#' @param fuente Fuente tipográfica para el gráfico (como string)
+#' @param etiqueta_x Etiqueta del eje X
+#' @param etiqueta_y Etiqueta del eje Y
 #'
-#' @return Un objeto ggplot
 #' @export
 grafica_bonita <- function(data,
                            x,
@@ -22,10 +22,11 @@ grafica_bonita <- function(data,
                            titulo = "Mi gráfico de línea bonito",
                            linea_vertical = NULL,
                            mostrar_intervalo = c("ninguno", "ambos", "superior", "inferior"),
+                           nombre_observado = "Observado",
+                           nombre_estimado_futuro = "Deseable",
+                           nombre_intervalo_superior = "Escenario alto",
+                           nombre_intervalo_inferior = "Escenario bajo",
                            mostrar_leyenda = FALSE,
-                           nombre_estimado = "Deseable",
-                           nombre_superior = "Escenario alto",
-                           nombre_inferior = "Escenario bajo",
                            fuente = NULL,
                            etiqueta_x = NULL,
                            etiqueta_y = NULL) {
@@ -35,68 +36,69 @@ grafica_bonita <- function(data,
   if (is.null(etiqueta_x)) etiqueta_x <- x
   if (is.null(etiqueta_y)) etiqueta_y <- y
 
-  theme_fuente <- if (!is.null(fuente)) ggplot2::element_text(family = fuente) else ggplot2::element_text()
+  if (!is.null(fuente)) {
+    theme_fuente <- ggplot2::element_text(family = fuente)
+  } else {
+    theme_fuente <- ggplot2::element_text()
+  }
 
-  # Asegurar que año sea numérico
-  data <- data %>% dplyr::mutate({{ x }} := as.numeric(.data[[x]]))
+  # Asegurar que x sea numérico
+  data <- data %>% dplyr::mutate(!!x := as.numeric(.data[[x]]))
 
-  # Crear tipo_linea para distinguir estimado/observado
-  data_plot <- dplyr::mutate(data, tipo_linea = nombre_estimado)
+  # Crear variable tipo_linea
+  data_plot <- data %>%
+    dplyr::mutate(tipo_linea = nombre_observado)
 
   if (!is.null(linea_vertical)) {
     data_plot <- data_plot %>%
       dplyr::mutate(
-        tipo_linea = dplyr::if_else(
-          .data[[x]] > linea_vertical,
-          nombre_estimado,
-          "Observado"
-        )
+        tipo_linea = dplyr::if_else(.data[[x]] > linea_vertical,
+                                    nombre_estimado_futuro,
+                                    nombre_observado)
       )
   }
 
-  # Gráfico base
-  p <- ggplot2::ggplot(data_plot, ggplot2::aes(x = .data[[x]], y = .data[[y]], colour = tipo_linea)) +
+  # Construcción del gráfico
+  p <- ggplot2::ggplot(data_plot, ggplot2::aes(x = .data[[x]], y = .data[[y]], color = tipo_linea)) +
     ggplot2::geom_line(linewidth = 1.5) +
-    ggplot2::scale_color_manual(
-      values = c(
-        "Observado" = "#9F2241",
-        "Deseable" = "#027a35",
-        "Escenario bajo" = "#C77CFF",
-        "Escenario alto" = "#00BFC4"
-      ),
-      name = NULL
-    ) +
     ggplot2::labs(title = titulo, x = etiqueta_x, y = etiqueta_y) +
     ggplot2::theme_minimal() +
     ggplot2::theme(
       plot.title = ggplot2::element_text(hjust = 0, size = 30, face = "bold"),
       text = theme_fuente,
       axis.text.x = ggplot2::element_text(size = 12, angle = 90),
-      axis.title = ggplot2::element_text(size = 16),
-      legend.position = if (mostrar_leyenda) "right" else "none"
+      legend.title = ggplot2::element_blank()
     ) +
-    ggplot2::scale_x_continuous(breaks = seq(min(data[[x]], na.rm = TRUE),
-                                             max(data[[x]], na.rm = TRUE), by = 2))
+    ggplot2::scale_x_continuous(breaks = seq(min(data_plot[[x]]), max(data_plot[[x]]), by = 2)) +
+    ggplot2::scale_color_manual(values = c(
+      !!nombre_observado := "#9F2241",
+      !!nombre_estimado_futuro := "#027a35"
+    ))
 
   # Línea vertical
   if (!is.null(linea_vertical)) {
-    p <- p + ggplot2::geom_vline(xintercept = linea_vertical, linetype = "dashed", color = "red", linewidth = 1)
+    p <- p + ggplot2::geom_vline(xintercept = linea_vertical,
+                                 linetype = "dashed",
+                                 color = "red",
+                                 linewidth = 1)
   }
 
-  # Intervalo superior
+  # Líneas de intervalos
   if (mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
-    p <- p + ggplot2::geom_line(
-      ggplot2::aes(x = .data[[x]], y = .data[["superior"]], colour = nombre_superior),
-      linetype = "dotted", linewidth = 1.5, show.legend = mostrar_leyenda
-    )
+    p <- p + ggplot2::geom_line(data = data, 
+                                ggplot2::aes(y = .data[["superior"]], color = nombre_intervalo_superior),
+                                linewidth = 1.5, linetype = "dotted")
   }
 
-  # Intervalo inferior
   if (mostrar_intervalo %in% c("ambos", "inferior") && "inferior" %in% names(data)) {
-    p <- p + ggplot2::geom_line(
-      ggplot2::aes(x = .data[[x]], y = .data[["inferior"]], colour = nombre_inferior),
-      linetype = "dotted", linewidth = 1.5, show.legend = mostrar_leyenda
-    )
+    p <- p + ggplot2::geom_line(data = data, 
+                                ggplot2::aes(y = .data[["inferior"]], color = nombre_intervalo_inferior),
+                                linewidth = 1.5, linetype = "dotted")
+  }
+
+  # Mostrar o quitar leyenda
+  if (!mostrar_leyenda) {
+    p <- p + ggplot2::theme(legend.position = "none")
   }
 
   return(p)
