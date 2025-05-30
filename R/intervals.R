@@ -1,18 +1,29 @@
-#' Añade intervalos superior e inferior a toda la serie (observados + estimados)
+#' Añade columnas estimado/superior/inferior, con o sin intervalos
 #'
-#' @param data Un data.frame con columnas year y una variable estimada
-#' @param var Nombre de la columna de estimación
-#' @param margen Porcentaje de intervalo (por ejemplo 0.05 para ±5%)
-#' @return El mismo data.frame con columnas: 'estimado', 'superior', 'inferior'
+#' @param data Data frame con columna `year` y una variable numérica
+#' @param var Nombre de la columna con los valores base
+#' @param margen Margen porcentual para los intervalos (ej. 0.01 = ±1%)
+#' @param aplicar_intervalos Lógico. Si FALSE, copia el mismo valor a todas las columnas.
+#' @return Data frame con columnas: year, estimado, superior, inferior
 #' @export
-intervals <- function(data, var = "porcentaje", margen = 0.05) {
-  data <- data %>%
-    dplyr::mutate(
-      estimado = .data[[var]],
-      superior = estimado * (1 + margen),
-      inferior = estimado * (1 - margen)
-    ) %>%
-    dplyr::select(year, estimado, superior, inferior)
+intervals <- function(data, var = "porcentaje", margen = 0.05, aplicar_intervalos = TRUE) {
+  valor <- data[[var]]
+  
+  if (aplicar_intervalos) {
+    estimado  <- valor
+    superior  <- valor * (1 + margen)
+    inferior  <- valor * (1 - margen)
+  } else {
+    estimado  <- valor
+    superior  <- valor
+    inferior  <- valor
+  }
 
-  return(data)
+  return(dplyr::tibble(
+    year = as.numeric(data$year),
+    estimado = estimado,
+    superior = superior,
+    inferior = inferior
+  ))
 }
+
