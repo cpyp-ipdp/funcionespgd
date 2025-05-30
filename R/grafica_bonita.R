@@ -1,3 +1,24 @@
+#' Gráfica de línea estilizada para indicadores estimados
+#'
+#' Genera una gráfica de línea con opción a mostrar intervalos, línea vertical, leyenda y fuente personalizada.
+#'
+#' @param data Un data.frame o tibble con las columnas necesarias.
+#' @param x Variable para eje X (usualmente año), como string.
+#' @param y Variable a graficar en eje Y (valor estimado), como string.
+#' @param titulo Título principal del gráfico.
+#' @param linea_vertical Año para colocar línea vertical (numérico o NULL).
+#' @param mostrar_intervalo Intervalos a mostrar: "ninguno", "ambos", "superior", "inferior".
+#' @param fuente Fuente tipográfica (opcional, compatible con `showtext` o Google Fonts).
+#' @param etiqueta_x Etiqueta del eje X.
+#' @param etiqueta_y Etiqueta del eje Y.
+#' @param mostrar_leyenda Lógico: si se desea mostrar la leyenda.
+#' @param nombre_estimado Nombre del tramo principal (predeterminado: "Deseable").
+#' @param nombre_superior Etiqueta para el intervalo superior.
+#' @param nombre_inferior Etiqueta para el intervalo inferior.
+#'
+#' @return Un objeto ggplot listo para graficar.
+#' @export
+
 grafica_bonita <- function(data, x, y,
                            titulo = "Mi gráfico de línea bonito",
                            linea_vertical = NULL,
