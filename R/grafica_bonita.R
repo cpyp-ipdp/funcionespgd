@@ -11,34 +11,67 @@ grafica_bonita <- function(data, x, y,
                            nombre_inferior = "Escenario bajo") {
   
   mostrar_intervalo <- match.arg(mostrar_intervalo)
-  
   if (is.null(etiqueta_x)) etiqueta_x <- x
   if (is.null(etiqueta_y)) etiqueta_y <- y
-  theme_fuente <- if (!is.null(fuente)) ggplot2::element_text(family = fuente) else ggplot2::element_text()
+  if (!is.null(fuente)) theme_fuente <- ggplot2::element_text(family = fuente) else theme_fuente <- ggplot2::element_text()
   
-  # Separar tramos antes y después del año de corte
+  # Asegurar year numérico
+  data <- data %>% dplyr::mutate(!!x := as.numeric(.data[[x]]))
+  
+  # Crear columna tipo_linea
+  data_plot <- dplyr::mutate(data, tipo_linea = nombre_estimado)
+  
   if (!is.null(linea_vertical)) {
-    data_pasado <- dplyr::filter(data, !!rlang::sym(x) <= linea_vertical)
-    data_futuro <- dplyr::filter(data, !!rlang::sym(x) > linea_vertical)
-  } else {
-    data_pasado <- data
-    data_futuro <- NULL
+    data_plot <- dplyr::mutate(
+      data_plot,
+      tipo_linea = dplyr::if_else(.data[[x]] > linea_vertical,
+                                  paste0(nombre_estimado, " (futuro)"),
+                                  nombre_estimado)
+    )
   }
   
-  p <- ggplot2::ggplot(data, ggplot2::aes_string(x = x)) +
-    
-    # Línea estimada antes del año vertical
-    ggplot2::geom_line(data = data_pasado,
-                       ggplot2::aes_string(y = y, color = shQuote(nombre_estimado)),
-                       linewidth = 1.5) +
-    
-    # Línea estimada después del año vertical (si hay)
-    if (!is.null(data_futuro) && nrow(data_futuro) > 0)
-      ggplot2::geom_line(data = data_futuro,
-                         ggplot2::aes_string(y = y, color = shQuote(paste0(nombre_estimado, " (futuro)"))),
-                         linewidth = 1.5)
-  else NULL +
-
+  # Agregar intervalos si se requieren
+  if (mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
+    data_plot <- dplyr::bind_rows(
+      data_plot,
+      data %>% dplyr::filter(!is.na(superior)) %>%
+        dplyr::transmute(!!x := .data[[x]], valor = superior, tipo_linea = nombre_superior)
+    )
+  }
+  
+  if (mostrar_intervalo %in% c("ambos", "inferior") && "inferior" %in% names(data)) {
+    data_plot <- dplyr::bind_rows(
+      data_plot,
+      data %>% dplyr::filter(!is.na(inferior)) %>%
+        dplyr::transmute(!!x := .data[[x]], valor = inferior, tipo_linea = nombre_inferior)
+    )
+  }
+  
+  # Asignar valor principal
+  if (!"valor" %in% names(data_plot)) {
+    data_plot$valor <- data_plot[[y]]
+  }
+  
+  # Paleta de colores personalizada
+  colores <- c(
+    !!nombre_estimado := "#691c32",
+    !!paste0(nombre_estimado, " (futuro)") := "#1b7837",
+    !!nombre_superior := "#888888",
+    !!nombre_inferior := "#888888"
+  )
+  
+  tipos_linea <- c(
+    !!nombre_estimado := "solid",
+    !!paste0(nombre_estimado, " (futuro)") := "solid",
+    !!nombre_superior := "dotted",
+    !!nombre_inferior := "dotted"
+  )
+  
+  # Construir gráfica
+  p <- ggplot2::ggplot(data_plot, ggplot2::aes_string(x = x, y = "valor", color = "tipo_linea", linetype = "tipo_linea")) +
+    ggplot2::geom_line(linewidth = 1.5) +
+    ggplot2::scale_color_manual(values = colores) +
+    ggplot2::scale_linetype_manual(values = tipos_linea) +
     ggplot2::labs(title = titulo, x = etiqueta_x, y = etiqueta_y) +
     ggplot2::theme_minimal() +
     ggplot2::theme(
@@ -48,48 +81,17 @@ grafica_bonita <- function(data, x, y,
       legend.title = ggplot2::element_blank()
     )
   
+  # Eje X en saltos de 2 años
+  if (is.numeric(data[[x]])) {
+    p <- p + ggplot2::scale_x_continuous(breaks = seq(min(data[[x]]), max(data[[x]]), by = 2))
+  }
+  
   # Línea vertical
   if (!is.null(linea_vertical)) {
     p <- p + ggplot2::geom_vline(xintercept = linea_vertical, linetype = "dashed", color = "red", linewidth = 1)
   }
   
-  # Intervalos
-  if (mostrar_intervalo == "ambos") {
-    if ("superior" %in% names(data)) {
-      p <- p + ggplot2::geom_line(
-        data = dplyr::filter(data, !is.na(superior)),
-        ggplot2::aes_string(y = "superior", color = shQuote("Escenarios")),
-        linetype = "dotted", linewidth = 1.5
-      )
-    }
-    if ("inferior" %in% names(data)) {
-      p <- p + ggplot2::geom_line(
-        data = dplyr::filter(data, !is.na(inferior)),
-        ggplot2::aes_string(y = "inferior", color = shQuote("Escenarios")),
-        linetype = "dotted", linewidth = 1.5
-      )
-    }
-  } else if (mostrar_intervalo == "superior" && "superior" %in% names(data)) {
-    p <- p + ggplot2::geom_line(
-      data = dplyr::filter(data, !is.na(superior)),
-      ggplot2::aes_string(y = "superior", color = shQuote(nombre_superior)),
-      linetype = "dotted", linewidth = 1.5
-    )
-  } else if (mostrar_intervalo == "inferior" && "inferior" %in% names(data)) {
-    p <- p + ggplot2::geom_line(
-      data = dplyr::filter(data, !is.na(inferior)),
-      ggplot2::aes_string(y = "inferior", color = shQuote(nombre_inferior)),
-      linetype = "dotted", linewidth = 1.5
-    )
-  }
-  
-  # Eje X cada 2 años
-  if (is.numeric(data[[x]])) {
-    anios <- sort(unique(data[[x]]))
-    p <- p + ggplot2::scale_x_continuous(breaks = seq(min(anios), max(anios), by = 2))
-  }
-  
-  # Ocultar leyenda si no se solicita
+  # Leyenda
   if (!mostrar_leyenda) {
     p <- p + ggplot2::theme(legend.position = "none")
   }
