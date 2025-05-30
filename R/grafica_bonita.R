@@ -20,7 +20,7 @@ grafica_bonita <- function(data, x, y,
                            titulo = "Mi gráfico de línea bonito",
                            linea_vertical = NULL,
                            mostrar_intervalo = c("ninguno", "ambos", "superior", "inferior"),
-                           nombre_estimado = "Deseable",
+                           nombre_estimado = "Observado",
                            nombre_superior = "Escenario alto",
                            nombre_inferior = "Escenario bajo",
                            mostrar_leyenda = FALSE,
@@ -68,7 +68,7 @@ grafica_bonita <- function(data, x, y,
     ggplot2::scale_color_manual(
       values = c(
         nombre_estimado = "#9F2241",
-        `Deseable (futuro)` = "#9F2241",
+        `Deseable` = "#9F2241",
         !!nombre_superior := "#027a35",
         !!nombre_inferior := "#027a35"
       )
