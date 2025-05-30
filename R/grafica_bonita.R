@@ -83,7 +83,8 @@ grafica_bonita <- function(data, x, y,
       y = etiqueta_y,
       color = titulo_leyenda
     ) +
-    ggplot2::scale_x_continuous(breaks = seq(min(data[[x]]), max(data[[x]]), 2)) +
+    ggplot2::scale_x_continuous(breaks = sort(unique(c(seq(min(data[[x]]), max(data[[x]]), 2), 2022, 2030, 2035, 2045)))) +
+    ggplot2::scale_y_continuous(limits = c(0, NA)) +
     ggplot2::scale_color_manual(values = valores_color) +
     ggplot2::theme_minimal() +
     ggplot2::theme(
