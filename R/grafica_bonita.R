@@ -1,7 +1,7 @@
-#' Gráfica de línea personalizada
+#' Gráfica de línea personalizada para series temporales
 #'
 #' @param data Un data.frame con columnas numéricas
-#' @param x Variable del eje X (como string)
+#' @param x Variable del eje X (como string, usualmente "year")
 #' @param y Variable principal del eje Y (como string)
 #' @param titulo Título del gráfico
 #' @param linea_vertical Valor opcional para dibujar una línea vertical (ej. un año)
@@ -21,9 +21,9 @@ grafica_bonita <- function(data, x, y,
 
   mostrar_intervalo <- match.arg(mostrar_intervalo)
 
-  # Usar el nombre de la variable si no se proporciona etiqueta
-  etiqueta_x <- etiqueta_x %||% x
-  etiqueta_y <- etiqueta_y %||% y
+  # Etiquetas por default si no se especifican
+  if (is.null(etiqueta_x)) etiqueta_x <- x
+  if (is.null(etiqueta_y)) etiqueta_y <- y
 
   theme_fuente <- if (!is.null(fuente)) ggplot2::element_text(family = fuente) else ggplot2::element_text()
 
@@ -37,16 +37,23 @@ grafica_bonita <- function(data, x, y,
       axis.text.x = ggplot2::element_text(size = 12, angle = 90, family = fuente)
     )
 
+  # Línea vertical
   if (!is.null(linea_vertical)) {
     p <- p + ggplot2::geom_vline(xintercept = linea_vertical, linetype = "dashed", color = "gray40", size = 1)
   }
 
+  # Intervalos
   if (mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
     p <- p + ggplot2::geom_line(ggplot2::aes_string(y = "superior"), linetype = "dotted", color = "gray50")
   }
-
   if (mostrar_intervalo %in% c("ambos", "inferior") && "inferior" %in% names(data)) {
     p <- p + ggplot2::geom_line(ggplot2::aes_string(y = "inferior"), linetype = "dotted", color = "gray50")
+  }
+
+  # Si el eje x es numérico, poner saltos de 2 en 2
+  if (is.numeric(data[[x]])) {
+    anios <- sort(unique(data[[x]]))
+    p <- p + ggplot2::scale_x_continuous(breaks = seq(min(anios), max(anios), by = 2))
   }
 
   return(p)
