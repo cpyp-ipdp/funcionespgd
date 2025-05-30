@@ -16,8 +16,6 @@ grafica_bonita <- function(data, x, y,
   if (is.null(etiqueta_x)) etiqueta_x <- x
   if (is.null(etiqueta_y)) etiqueta_y <- y
 
-  theme_fuente <- if (!is.null(fuente)) ggplot2::element_text(family = fuente) else ggplot2::element_text()
-
   data[[x]] <- as.numeric(data[[x]])
 
   data_plot <- dplyr::mutate(data, tipo_linea = nombre_observado)
@@ -42,7 +40,7 @@ grafica_bonita <- function(data, x, y,
 
   # Estimado futuro
   p <- p + ggplot2::geom_line(
-    data = data_plot[data_plot$tipo_linea == nombre_estimado_futuro & data_plot[[x]] >= linea_vertical, ],
+    data = data_plot[data_plot$tipo_linea == nombre_estimado_futuro & data_plot[[x]] >= linea_vertical - 1, ],
     ggplot2::aes_string(x = x, y = y, color = sprintf('"%s"', nombre_estimado_futuro)),
     size = 1.5
   )
@@ -50,7 +48,7 @@ grafica_bonita <- function(data, x, y,
   # Intervalos
   if (mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
     p <- p + ggplot2::geom_line(
-      data = data[data[[x]] >= linea_vertical, ],
+      data = data[data[[x]] >= linea_vertical - 1, ],
       ggplot2::aes_string(x = x, y = "superior", color = sprintf('"%s"', nombre_intervalo_superior)),
       size = 1.5, linetype = "dotted"
     )
@@ -58,7 +56,7 @@ grafica_bonita <- function(data, x, y,
 
   if (mostrar_intervalo %in% c("ambos", "inferior") && "inferior" %in% names(data)) {
     p <- p + ggplot2::geom_line(
-      data = data[data[[x]] >= linea_vertical, ],
+      data = data[data[[x]] >= linea_vertical - 1, ],
       ggplot2::aes_string(x = x, y = "inferior", color = sprintf('"%s"', nombre_intervalo_inferior)),
       size = 1.5, linetype = "dotted"
     )
@@ -71,24 +69,21 @@ grafica_bonita <- function(data, x, y,
                                  linewidth = 1)
   }
 
+  valores_color <- setNames(
+    c("#9F2241", "#027a35", "#969696", "#969696"),
+    c(nombre_observado, nombre_estimado_futuro, nombre_intervalo_superior, nombre_intervalo_inferior)
+  )
+
   p <- p + ggplot2::labs(title = titulo, x = etiqueta_x, y = etiqueta_y) +
     ggplot2::scale_x_continuous(breaks = seq(min(data[[x]]), max(data[[x]]), 2)) +
-    ggplot2::scale_color_manual(
-      values = c(
-        nombre_observado = "#9F2241",
-        nombre_estimado_futuro = "#027a35",
-        nombre_intervalo_superior = "#969696",
-        nombre_intervalo_inferior = "#969696"
-      )
-    ) +
+    ggplot2::scale_color_manual(values = valores_color) +
     ggplot2::theme_minimal() +
     ggplot2::theme(
-      plot.title = ggplot2::element_text(hjust = 0, size = 28, face = "bold"),
-      text = ggplot2::element_text(size = 16),
+      plot.title = ggplot2::element_text(size = 28, face = "bold", hjust = 0),
+      text = ggplot2::element_text(size = 16, family = fuente),
       axis.text.x = ggplot2::element_text(size = 12, angle = 90),
-      legend.position = if (mostrar_leyenda) "right" else "none",
-      text = theme_fuente
+      legend.position = if (mostrar_leyenda) "right" else "none"
     )
 
   return(p)
-} 
+}
