@@ -84,7 +84,7 @@ grafica_bonita <- function(data, x, y,
       y = etiqueta_y,
       color = titulo_leyenda
     ) +
-    ggplot2::scale_x_continuous(breaks = sort(unique(c(seq(min(data[[x]]), max(data[[x]]), 2), 2022, 2030, 2035, 2045)))) +
+    ggplot2::scale_x_continuous(breaks = sort(unique(c(seq(min(data[[x]]), max(data[[x]]), 2), 2022)))) +
     ggplot2::scale_y_continuous(limits = c(limite_inferior_y, NA)) +
     ggplot2::scale_color_manual(values = valores_color) +
     ggplot2::theme_minimal() +
@@ -107,6 +107,30 @@ grafica_bonita <- function(data, x, y,
     size = 4,
     color = "#027a35"
   )
+
+  # Etiquetas en puntos clave del escenario inferior
+  if (mostrar_intervalo %in% c("ambos", "inferior") && "inferior" %in% names(data)) {
+    data_etiquetas_inf <- data[data[[x]] %in% etiquetas_anos, ]
+    p <- p + ggplot2::geom_text(
+      data = data_etiquetas_inf,
+      ggplot2::aes_string(x = x, y = "inferior", label = "round(inferior, 1)"),
+      vjust = -1,
+      size = 4,
+      color = "#969696"
+    )
+  }
+
+  # Etiquetas en puntos clave del escenario superior
+  if (mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
+    data_etiquetas_sup <- data[data[[x]] %in% etiquetas_anos, ]
+    p <- p + ggplot2::geom_text(
+      data = data_etiquetas_sup,
+      ggplot2::aes_string(x = x, y = "superior", label = "round(superior, 1)"),
+      vjust = -1,
+      size = 4,
+      color = "#969696"
+    )
+  }
 
   return(p)
 }
