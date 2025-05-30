@@ -24,9 +24,11 @@ grafica_bonita <- function(data, x, y,
   if (!is.null(linea_vertical)) {
     data_plot <- dplyr::mutate(
       data_plot,
-      tipo_linea = ifelse(data_plot[[x]] >= linea_vertical,
-                          nombre_estimado_futuro,
-                          nombre_observado)
+      tipo_linea = dplyr::case_when(
+        .data[[x]] < linea_vertical ~ nombre_observado,
+        .data[[x]] == linea_vertical ~ paste0(nombre_observado, "+"),
+        .data[[x]] > linea_vertical ~ nombre_estimado_futuro
+      )
     )
   }
 
@@ -34,7 +36,7 @@ grafica_bonita <- function(data, x, y,
 
   # Observado
   p <- p + ggplot2::geom_line(
-    data = data_plot[data_plot$tipo_linea == nombre_observado, ],
+    data = data_plot[data_plot$tipo_linea %in% c(nombre_observado, paste0(nombre_observado, "+")), ],
     ggplot2::aes_string(x = x, y = y, color = sprintf('"%s"', nombre_observado)),
     size = 1.5
   )
