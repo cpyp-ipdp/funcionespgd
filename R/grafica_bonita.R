@@ -35,10 +35,10 @@ grafica_bonita <- function(data, x, y,
   colores[nombre_estimado_futuro] <- "#027a35"
   colores[nombre_estimado] <- "#9F2241"
   if (mostrar_intervalo %in% c("ambos", "superior")) {
-    colores[nombre_intervalo_superior] <- "#027a35"
+    colores[nombre_intervalo_superior] <- "#969696"
   }
   if (mostrar_intervalo %in% c("ambos", "inferior")) {
-    colores[nombre_intervalo_inferior] <- "#027a35"
+    colores[nombre_intervalo_inferior] <- "#969696"
   }
 
   p <- ggplot2::ggplot(data, ggplot2::aes_string(x = x, y = y, color = "tipo_linea")) +
