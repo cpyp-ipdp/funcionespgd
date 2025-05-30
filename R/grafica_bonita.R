@@ -10,7 +10,8 @@ grafica_bonita <- function(data, x, y,
                            nombre_estimado_futuro = "Deseable",
                            nombre_intervalo_superior = "Escenario alto",
                            nombre_intervalo_inferior = "Escenario bajo",
-                           titulo_leyenda = "Escenarios") {
+                           titulo_leyenda = "Escenarios",
+                           eje_y_inicio = 0) {
 
   mostrar_intervalo <- match.arg(mostrar_intervalo)
 
@@ -84,7 +85,7 @@ grafica_bonita <- function(data, x, y,
       color = titulo_leyenda
     ) +
     ggplot2::scale_x_continuous(breaks = sort(unique(c(seq(min(data[[x]]), max(data[[x]]), 2), 2022, 2030, 2035, 2045)))) +
-    ggplot2::scale_y_continuous(limits = c(0, NA)) +
+    ggplot2::scale_y_continuous(limits = c(eje_y_inicio, NA)) +
     ggplot2::scale_color_manual(values = valores_color) +
     ggplot2::theme_minimal() +
     ggplot2::theme(
@@ -93,6 +94,19 @@ grafica_bonita <- function(data, x, y,
       axis.text.x = ggplot2::element_text(size = 12, angle = 90),
       legend.position = if (mostrar_leyenda) "right" else "none"
     )
+
+  # Etiquetas en puntos clave del estimado futuro
+  etiquetas_anos <- c(linea_vertical, 2030, 2035, 2045)
+  data_etiquetas <- data_plot[data_plot[[x]] %in% etiquetas_anos &
+                                data_plot$tipo_linea == nombre_estimado_futuro, ]
+
+  p <- p + ggplot2::geom_text(
+    data = data_etiquetas,
+    ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 1)", y)),
+    vjust = -1,
+    size = 4,
+    color = "#027a35"
+  )
 
   return(p)
 }
