@@ -39,15 +39,15 @@ grafica_bonita <- function(data, x, y,
 
   # Línea vertical
   if (!is.null(linea_vertical)) {
-    p <- p + ggplot2::geom_vline(xintercept = linea_vertical, linetype = "dashed", color = "gray40", size = 1)
+    p <- p + ggplot2::geom_vline(xintercept = linea_vertical, linetype = "dashed", color = "red", size = 1)
   }
 
   # Intervalos
   if (mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
-    p <- p + ggplot2::geom_line(ggplot2::aes_string(y = "superior"), linetype = "dotted", color = "gray50")
+    p <- p + ggplot2::geom_line(ggplot2::aes_string(y = "superior"), linetype = "dotted", color = "gray50", size, 1.5)
   }
   if (mostrar_intervalo %in% c("ambos", "inferior") && "inferior" %in% names(data)) {
-    p <- p + ggplot2::geom_line(ggplot2::aes_string(y = "inferior"), linetype = "dotted", color = "gray50")
+    p <- p + ggplot2::geom_line(ggplot2::aes_string(y = "inferior"), linetype = "dotted", color = "gray50", size=1.5)
   }
 
   # Si el eje x es numérico, poner saltos de 2 en 2
