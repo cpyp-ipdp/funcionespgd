@@ -114,7 +114,7 @@ grafica_bonita <- function(data, x, y,
     p <- p + ggplot2::geom_text(
       data = data_etiquetas_inf,
       ggplot2::aes_string(x = x, y = "inferior", label = "round(inferior, 1)"),
-      vjust = -1,
+      vjust = 1.8,
       size = 4,
       color = "#969696"
     )
