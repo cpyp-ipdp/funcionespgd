@@ -1,0 +1,2 @@
+export(grafica_bonita)
+export(modifica_tendencia)
