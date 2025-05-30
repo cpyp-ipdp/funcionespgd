@@ -1,10 +1,10 @@
-Package: funciones_pgd
+Package: funcionespgd
 Type: Package
-Title: Funciones para análisis del PGD
+Title: Funciones para gráficas y tendencias del PGD
 Version: 0.1.0
 Author: Tu Nombre
 Maintainer: Tu Nombre <tunombre@email.com>
-Description: Contiene funciones útiles para visualización y análisis como 'grafica_bonita' y 'modifica_tendencia'.
+Description: Contiene funciones como grafica_bonita y modifica_tendencia para visualización y análisis.
 License: MIT
 Encoding: UTF-8
 LazyData: true
