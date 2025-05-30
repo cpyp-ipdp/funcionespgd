@@ -9,7 +9,8 @@ grafica_bonita <- function(data, x, y,
                            nombre_observado = "Observado",
                            nombre_estimado_futuro = "Deseable",
                            nombre_intervalo_superior = "Escenario alto",
-                           nombre_intervalo_inferior = "Escenario bajo") {
+                           nombre_intervalo_inferior = "Escenario bajo",
+                           titulo_leyenda = "Escenarios") {
 
   mostrar_intervalo <- match.arg(mostrar_intervalo)
 
@@ -74,7 +75,12 @@ grafica_bonita <- function(data, x, y,
     c(nombre_observado, nombre_estimado_futuro, nombre_intervalo_superior, nombre_intervalo_inferior)
   )
 
-  p <- p + ggplot2::labs(title = titulo, x = etiqueta_x, y = etiqueta_y) +
+  p <- p + ggplot2::labs(
+      title = titulo,
+      x = etiqueta_x,
+      y = etiqueta_y,
+      color = titulo_leyenda
+    ) +
     ggplot2::scale_x_continuous(breaks = seq(min(data[[x]]), max(data[[x]]), 2)) +
     ggplot2::scale_color_manual(values = valores_color) +
     ggplot2::theme_minimal() +
