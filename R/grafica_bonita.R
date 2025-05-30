@@ -8,7 +8,7 @@
 #' @param fuente Nombre de la fuente tipográfica
 #' @param etiqueta_x, etiqueta_y Etiquetas personalizadas para los ejes
 #' @param mostrar_leyenda Booleano: incluir leyenda o no
-#' @param nombre_linea_vertical Texto para la línea roja vertical
+#' @param nombre_estimado Etiqueta de la línea estimada (por ejemplo, "Deseable")
 #' @param nombre_superior, nombre_inferior Etiquetas para las líneas punteadas
 #' @return ggplot
 #' @export
@@ -20,9 +20,9 @@ grafica_bonita <- function(data, x, y,
                            etiqueta_x = NULL,
                            etiqueta_y = NULL,
                            mostrar_leyenda = FALSE,
-                           nombre_linea_vertical = NULL,
-                           nombre_superior = "Superior",
-                           nombre_inferior = "Inferior") {
+                           nombre_estimado = "Deseable",
+                           nombre_superior = "Escenario alto",
+                           nombre_inferior = "Escenario bajo") {
 
   mostrar_intervalo <- match.arg(mostrar_intervalo)
 
@@ -33,7 +33,7 @@ grafica_bonita <- function(data, x, y,
 
   # Plot base
   p <- ggplot2::ggplot(data, ggplot2::aes_string(x = x)) +
-    ggplot2::geom_line(ggplot2::aes_string(y = y, color = shQuote("Estimado")), size = 1.5) +
+    ggplot2::geom_line(ggplot2::aes_string(y = y, color = shQuote(nombre_estimado)), linewidth = 1.5) +
     ggplot2::labs(title = titulo, x = etiqueta_x, y = etiqueta_y) +
     ggplot2::theme_minimal() +
     ggplot2::theme(
@@ -43,16 +43,12 @@ grafica_bonita <- function(data, x, y,
       legend.title = ggplot2::element_blank()
     )
 
-  # Línea vertical (deseable)
+  # Línea vertical
   if (!is.null(linea_vertical)) {
     p <- p + ggplot2::geom_vline(xintercept = linea_vertical, linetype = "dashed", color = "red", linewidth = 1)
-    if (!is.null(nombre_linea_vertical)) {
-      p <- p + ggplot2::annotate("text", x = linea_vertical, y = Inf, label = nombre_linea_vertical,
-                                 color = "red", angle = 90, vjust = -0.5, family = fuente)
-    }
   }
 
-  # Intervalos punteados
+  # Intervalos
   if (mostrar_intervalo == "ambos" && "superior" %in% names(data) && "inferior" %in% names(data)) {
     p <- p +
       ggplot2::geom_line(
@@ -79,7 +75,7 @@ grafica_bonita <- function(data, x, y,
       linetype = "dotted")
   }
 
-  # Saltos x si es numérico
+  # Eje X de años
   if (is.numeric(data[[x]])) {
     anios <- sort(unique(data[[x]]))
     p <- p + ggplot2::scale_x_continuous(breaks = seq(min(anios), max(anios), by = 2))
