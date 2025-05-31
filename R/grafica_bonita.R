@@ -74,7 +74,7 @@ grafica_bonita <- function(data, x, y,
   }
 
   valores_color <- setNames(
-    c("#9F2241", "#027a35", "#969696", "#969696"),
+    c("#9F2241", "#027a35", "#BC955C", "#969696"),
     c(nombre_observado, nombre_estimado_futuro, nombre_intervalo_superior, nombre_intervalo_inferior)
   )
 
@@ -126,9 +126,9 @@ grafica_bonita <- function(data, x, y,
     p <- p + ggplot2::geom_text(
       data = data_etiquetas_sup,
       ggplot2::aes_string(x = x, y = "superior", label = "round(superior, 1)"),
-      vjust = -1,
+      vjust = -1.8,
       size = 4,
-      color = "#969696"
+      color = "#BC955C"
     )
   }
 
