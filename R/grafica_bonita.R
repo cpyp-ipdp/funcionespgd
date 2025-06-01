@@ -102,7 +102,7 @@ grafica_bonita <- function(data, x, y,
 
   p <- p + ggplot2::geom_text(
     data = data_etiquetas,
-    ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 1)", y)),
+    ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
     vjust = -1,
     size = 4,
     color = "#027a35"
@@ -113,7 +113,7 @@ grafica_bonita <- function(data, x, y,
     data_etiquetas_inf <- data[data[[x]] %in% etiquetas_anos, ]
     p <- p + ggplot2::geom_text(
       data = data_etiquetas_inf,
-      ggplot2::aes_string(x = x, y = "inferior", label = "round(inferior, 1)"),
+      ggplot2::aes_string(x = x, y = "inferior", label = "round(inferior, 2)"),
       vjust = 1.8,
       size = 4,
       color = "#969696"
@@ -125,7 +125,7 @@ grafica_bonita <- function(data, x, y,
     data_etiquetas_sup <- data[data[[x]] %in% etiquetas_anos, ]
     p <- p + ggplot2::geom_text(
       data = data_etiquetas_sup,
-      ggplot2::aes_string(x = x, y = "superior", label = "round(superior, 1)"),
+      ggplot2::aes_string(x = x, y = "superior", label = "round(superior, 2)"),
       vjust = -1.8,
       size = 4,
       color = "#BC955C"
