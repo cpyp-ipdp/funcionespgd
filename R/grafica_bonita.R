@@ -1,20 +1,21 @@
 grafica_bonita <- function(data, x, y,
-                         titulo = "Mi gráfico de línea bonito",
-                         linea_vertical = NULL,
-                         mostrar_intervalo = c("ninguno", "ambos", "superior", "inferior"),
-                         fuente = NULL,
-                         etiqueta_x = NULL,
-                         etiqueta_y = NULL,
-                         mostrar_leyenda = FALSE,
-                         ano_base = NULL,
-                         mostrar_etiqueta_ano_base = TRUE,
-                         anios_etiquetas = c(2030, 2035, 2045),
-                         nombre_observado = "Observado",
-                         nombre_estimado_futuro = "Deseable",
-                         nombre_intervalo_superior = "Escenario alto",
-                         nombre_intervalo_inferior = "Escenario bajo",
-                         titulo_leyenda = "Escenarios",
-                         limite_inferior_y = 0) {
+                           titulo = "Mi gráfico de línea bonito",
+                           linea_vertical = NULL,
+                           mostrar_intervalo = c("ninguno", "ambos", "superior", "inferior"),
+                           fuente = NULL,
+                           etiqueta_x = NULL,
+                           etiqueta_y = NULL,
+                           mostrar_leyenda = FALSE,
+                           ano_base = NULL,
+                           mostrar_etiqueta_ano_base = TRUE,
+                           desplazamiento_ano_base = c(0, 0),  # ← nuevo parámetro
+                           anios_etiquetas = c(2030, 2035, 2045),
+                           nombre_observado = "Observado",
+                           nombre_estimado_futuro = "Deseable",
+                           nombre_intervalo_superior = "Escenario alto",
+                           nombre_intervalo_inferior = "Escenario bajo",
+                           titulo_leyenda = "Escenarios",
+                           limite_inferior_y = 0) {
   
   mostrar_intervalo <- match.arg(mostrar_intervalo)
   
@@ -107,9 +108,7 @@ grafica_bonita <- function(data, x, y,
     )
   
   # Etiquetas: deseable
-  data_etiquetas <- data_plot[data_plot[[x]] %in% anios_etiquetas &
-                                data_plot$tipo_linea == nombre_estimado_futuro, ]
-  
+  data_etiquetas <- data_plot[data_plot[[x]] %in% anios_etiquetas & data_plot$tipo_linea == nombre_estimado_futuro, ]
   p <- p + ggplot2::geom_text(
     data = data_etiquetas,
     ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
@@ -141,20 +140,19 @@ grafica_bonita <- function(data, x, y,
       color = ifelse(nombre_intervalo_superior == "Transformador", "#BC955C", "#969696")
     )
   }
-
-  # Etiqueta del año base
+  
+  # Etiqueta del año base con desplazamiento
   if (mostrar_etiqueta_ano_base) {
-    data_etiqueta_base <- data_plot[data_plot[[x]] == ano_base &
-                                      data_plot$tipo_linea %in% c(nombre_observado, paste0(nombre_observado, "+")), ]
+    data_etiqueta_base <- data_plot[data_plot[[x]] == ano_base & data_plot$tipo_linea %in% c(nombre_observado, paste0(nombre_observado, "+")), ]
     
     if (nrow(data_etiqueta_base) > 0) {
       data_etiqueta_base_desplazada <- data_etiqueta_base
-      data_etiqueta_base_desplazada[[x]] <- ano_base + 1
+      data_etiqueta_base_desplazada[[x]] <- ano_base + desplazamiento_ano_base[1]
+      data_etiqueta_base_desplazada[[y]] <- data_etiqueta_base_desplazada[[y]] + desplazamiento_ano_base[2]
       
       p <- p + ggplot2::geom_text(
         data = data_etiqueta_base_desplazada,
         ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
-        vjust = -1,
         size = 5.5,
         color = "#9F2241"
       )
