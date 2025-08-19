@@ -144,7 +144,7 @@ grafica_bonita <- function(data, x, y,
     }
   }
 
-  # ===== Etiqueta del año base: SOLO si existe ese año =====
+  # ===== Etiqueta del año base: conserva valor y solo desplaza =====
   if (mostrar_etiqueta_ano_base && !is.null(ano_base)) {
     fila_base <- data_plot[data_plot[[x]] == ano_base, , drop = FALSE]
     if (nrow(fila_base) > 0) {
@@ -154,15 +154,15 @@ grafica_bonita <- function(data, x, y,
 
       p <- p + ggplot2::annotate(
         "text",
-        x = ano_base + dx,
-        y = val_base + dy,
-        label = round(val_base, 2),
+        x = ano_base + dx,            # solo posición x
+        y = val_base + dy,            # solo posición y
+        label = round(val_base, 2),   # valor siempre original
         size = 5.5,
         color = "#9F2241"
       )
     }
   }
-  # ==========================================================================
+  # =================================================================
 
   return(p)
 }
