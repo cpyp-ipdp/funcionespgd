@@ -141,18 +141,19 @@ grafica_bonita <- function(data, x, y,
     )
   }
 
-  # --- Opción A: tomar exactamente el año base, sin filtrar por tipo_linea ---
+  # --- Etiqueta del año base: conservar valor y solo desplazar la posición ---
   if (mostrar_etiqueta_ano_base && !is.null(ano_base)) {
-    data_etiqueta_base <- data_plot[data_plot[[x]] == ano_base, , drop = FALSE]
+    fila_base <- data_plot[data_plot[[x]] == ano_base, , drop = FALSE]
+    if (nrow(fila_base) > 0) {
+      val_base <- fila_base[[y]][1]                  # valor original
+      dx <- desplazamiento_ano_base[1]
+      dy <- desplazamiento_ano_base[2]
 
-    if (nrow(data_etiqueta_base) > 0) {
-      data_etiqueta_base_desplazada <- data_etiqueta_base
-      data_etiqueta_base_desplazada[[x]] <- ano_base + desplazamiento_ano_base[1]
-      data_etiqueta_base_desplazada[[y]] <- data_etiqueta_base_desplazada[[y]] + desplazamiento_ano_base[2]
-
-      p <- p + ggplot2::geom_text(
-        data = data_etiqueta_base_desplazada,
-        ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
+      p <- p + ggplot2::annotate(
+        "text",
+        x = ano_base + dx,                           # desplazamiento en x
+        y = val_base + dy,                           # desplazamiento en y
+        label = round(val_base, 2),                  # siempre el valor original
         size = 5.5,
         color = "#9F2241"
       )
