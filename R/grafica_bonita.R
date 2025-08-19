@@ -22,10 +22,11 @@ grafica_bonita <- function(data, x, y,
   if (is.null(etiqueta_x)) etiqueta_x <- x
   if (is.null(etiqueta_y)) etiqueta_y <- y
 
+  # Asegurar numérico en el eje x
   data[[x]] <- as.numeric(data[[x]])
 
+  # Marcar tramo observado vs futuro (si hay linea_vertical)
   data_plot <- dplyr::mutate(data, tipo_linea = nombre_observado)
-
   if (!is.null(linea_vertical)) {
     data_plot <- dplyr::mutate(
       data_plot,
@@ -47,25 +48,26 @@ grafica_bonita <- function(data, x, y,
   )
 
   # Línea futura estimada
-  p <- p + ggplot2::geom_line(
-    data = data_plot[data_plot$tipo_linea == nombre_estimado_futuro & data_plot[[x]] >= linea_vertical - 1, ],
-    ggplot2::aes_string(x = x, y = y, color = sprintf('"%s"', nombre_estimado_futuro)),
-    size = 1.5
-  )
-
-  # Intervalo superior
-  if (mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
+  if (!is.null(linea_vertical)) {
     p <- p + ggplot2::geom_line(
-      data = data[data[[x]] >= linea_vertical - 1, ],
+      data = data_plot[data_plot$tipo_linea == nombre_estimado_futuro &
+                         data_plot[[x]] >= (linea_vertical - 1), ],
+      ggplot2::aes_string(x = x, y = y, color = sprintf('"%s"', nombre_estimado_futuro)),
+      size = 1.5
+    )
+  }
+
+  # Intervalos
+  if (!is.null(linea_vertical) && mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
+    p <- p + ggplot2::geom_line(
+      data = data[data[[x]] >= (linea_vertical - 1), ],
       ggplot2::aes_string(x = x, y = "superior", color = sprintf('"%s"', nombre_intervalo_superior)),
       size = 1.5, linetype = "dotted"
     )
   }
-
-  # Intervalo inferior
-  if (mostrar_intervalo %in% c("ambos", "inferior") && "inferior" %in% names(data)) {
+  if (!is.null(linea_vertical) && mostrar_intervalo %in% c("ambos", "inferior") && "inferior" %in% names(data)) {
     p <- p + ggplot2::geom_line(
-      data = data[data[[x]] >= linea_vertical - 1, ],
+      data = data[data[[x]] >= (linea_vertical - 1), ],
       ggplot2::aes_string(x = x, y = "inferior", color = sprintf('"%s"', nombre_intervalo_inferior)),
       size = 1.5, linetype = "dotted"
     )
@@ -79,24 +81,22 @@ grafica_bonita <- function(data, x, y,
                                  linewidth = 1)
   }
 
-  # Asignación de colores
+  # Colores
   valores_color <- setNames(
     c(
       "#9F2241",  # Observado
       "#027a35",  # Deseable
-      ifelse(nombre_intervalo_superior == "Transformador", "#BC955C", "#969696"),  # Superior
-      ifelse(nombre_intervalo_inferior == "Transformador", "#BC955C", "#969696")   # Inferior
+      ifelse(nombre_intervalo_superior == "Transformador", "#BC955C", "#969696"),
+      ifelse(nombre_intervalo_inferior == "Transformador", "#BC955C", "#969696")
     ),
     c(nombre_observado, nombre_estimado_futuro, nombre_intervalo_superior, nombre_intervalo_inferior)
   )
 
   p <- p + ggplot2::labs(
-    title = titulo,
-    x = etiqueta_x,
-    y = etiqueta_y,
-    color = titulo_leyenda
+    title = titulo, x = etiqueta_x, y = etiqueta_y, color = titulo_leyenda
   ) +
-    ggplot2::scale_x_continuous(breaks = sort(unique(c(seq(min(data[[x]]), max(data[[x]]), 2), 2022)))) +
+    ggplot2::scale_x_continuous(breaks = sort(unique(c(seq(min(data[[x]], na.rm=TRUE),
+                                                          max(data[[x]], na.rm=TRUE), 2), 2022)))) +
     ggplot2::scale_y_continuous(limits = c(limite_inferior_y, NA)) +
     ggplot2::scale_color_manual(values = valores_color) +
     ggplot2::theme_minimal() +
@@ -108,58 +108,61 @@ grafica_bonita <- function(data, x, y,
     )
 
   # Etiquetas: deseable
-  data_etiquetas <- data_plot[data_plot[[x]] %in% anios_etiquetas & data_plot$tipo_linea == nombre_estimado_futuro, ]
-  p <- p + ggplot2::geom_text(
-    data = data_etiquetas,
-    ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
-    vjust = -1,
-    size = 5.5,
-    color = "#027a35"
-  )
+  data_etiquetas <- data_plot[data_plot[[x]] %in% anios_etiquetas &
+                                data_plot$tipo_linea == nombre_estimado_futuro, ]
+  if (nrow(data_etiquetas) > 0) {
+    p <- p + ggplot2::geom_text(
+      data = data_etiquetas,
+      ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
+      vjust = -1, size = 5.5, color = "#027a35"
+    )
+  }
 
   # Etiquetas: inferior
   if (mostrar_intervalo %in% c("ambos", "inferior") && "inferior" %in% names(data)) {
     data_etiquetas_inf <- data[data[[x]] %in% anios_etiquetas, ]
-    p <- p + ggplot2::geom_text(
-      data = data_etiquetas_inf,
-      ggplot2::aes_string(x = x, y = "inferior", label = "round(inferior, 2)"),
-      vjust = 1.8,
-      size = 5.5,
-      color = ifelse(nombre_intervalo_inferior == "Transformador", "#BC955C", "#969696")
-    )
+    if (nrow(data_etiquetas_inf) > 0) {
+      p <- p + ggplot2::geom_text(
+        data = data_etiquetas_inf,
+        ggplot2::aes_string(x = x, y = "inferior", label = "round(inferior, 2)"),
+        vjust = 1.8, size = 5.5,
+        color = ifelse(nombre_intervalo_inferior == "Transformador", "#BC955C", "#969696")
+      )
+    }
   }
 
   # Etiquetas: superior
   if (mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
     data_etiquetas_sup <- data[data[[x]] %in% anios_etiquetas, ]
-    p <- p + ggplot2::geom_text(
-      data = data_etiquetas_sup,
-      ggplot2::aes_string(x = x, y = "superior", label = "round(superior, 2)"),
-      vjust = -1.8,
-      size = 5.5,
-      color = ifelse(nombre_intervalo_superior == "Transformador", "#BC955C", "#969696")
-    )
+    if (nrow(data_etiquetas_sup) > 0) {
+      p <- p + ggplot2::geom_text(
+        data = data_etiquetas_sup,
+        ggplot2::aes_string(x = x, y = "superior", label = "round(superior, 2)"),
+        vjust = -1.8, size = 5.5,
+        color = ifelse(nombre_intervalo_superior == "Transformador", "#BC955C", "#969696")
+      )
+    }
   }
 
-  # --- Etiqueta del año base: conservar valor y solo desplazar la posición ---
+  # ===== Etiqueta del año base: SOLO si existe ese año =====
   if (mostrar_etiqueta_ano_base && !is.null(ano_base)) {
     fila_base <- data_plot[data_plot[[x]] == ano_base, , drop = FALSE]
     if (nrow(fila_base) > 0) {
-      val_base <- fila_base[[y]][1]                  # valor original
+      val_base <- fila_base[[y]][1]   # valor original del año base
       dx <- desplazamiento_ano_base[1]
       dy <- desplazamiento_ano_base[2]
 
       p <- p + ggplot2::annotate(
         "text",
-        x = ano_base + dx,                           # desplazamiento en x
-        y = val_base + dy,                           # desplazamiento en y
-        label = round(val_base, 2),                  # siempre el valor original
+        x = ano_base + dx,
+        y = val_base + dy,
+        label = round(val_base, 2),
         size = 5.5,
         color = "#9F2241"
       )
     }
   }
-  # ---------------------------------------------------------------------------
+  # ==========================================================================
 
   return(p)
 }
