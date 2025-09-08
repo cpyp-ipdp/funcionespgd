@@ -136,6 +136,24 @@ grafica_bonita <- function(data, x, y,
     )
   }
   
+# Etiquetas: superior
+if (mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
+  data_etiquetas_sup <- subset(
+    data,
+    .data[[x]] %in% anios_etiquetas & !is.na(superior)
+  )
+  if (nrow(data_etiquetas_sup) > 0) {
+    p <- p + ggplot2::geom_text(
+      data = data_etiquetas_sup,
+      ggplot2::aes_string(x = x, y = "superior", label = "round(superior, 2)"),
+      vjust = -1.8,
+      size = 7.5,
+      fontface = "bold",
+      color = ifelse(nombre_intervalo_superior == "Transformador", "#BC955C", "#969696")
+    )
+  }
+}
+
 # Etiqueta del año base con desplazamiento (sin alterar el valor mostrado)
 if (mostrar_etiqueta_ano_base) {
   data_etiqueta_base <- data_plot[
