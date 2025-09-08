@@ -43,14 +43,14 @@ grafica_bonita <- function(data, x, y,
   p <- p + ggplot2::geom_line(
     data = data_plot[data_plot$tipo_linea %in% c(nombre_observado, paste0(nombre_observado, "+")), ],
     ggplot2::aes_string(x = x, y = y, color = sprintf('"%s"', nombre_observado)),
-    size = 1.5
+    size = 2
   )
   
   # Línea futura estimada
   p <- p + ggplot2::geom_line(
     data = data_plot[data_plot$tipo_linea == nombre_estimado_futuro & data_plot[[x]] >= linea_vertical - 1, ],
     ggplot2::aes_string(x = x, y = y, color = sprintf('"%s"', nombre_estimado_futuro)),
-    size = 1.5
+    size = 2
   )
   
   # Intervalo superior
@@ -58,7 +58,7 @@ grafica_bonita <- function(data, x, y,
     p <- p + ggplot2::geom_line(
       data = data[data[[x]] >= linea_vertical - 1, ],
       ggplot2::aes_string(x = x, y = "superior", color = sprintf('"%s"', nombre_intervalo_superior)),
-      size = 1.5, linetype = "dotted"
+      size = 2, linetype = "dotted"
     )
   }
   
@@ -67,7 +67,7 @@ grafica_bonita <- function(data, x, y,
     p <- p + ggplot2::geom_line(
       data = data[data[[x]] >= linea_vertical - 1, ],
       ggplot2::aes_string(x = x, y = "inferior", color = sprintf('"%s"', nombre_intervalo_inferior)),
-      size = 1.5, linetype = "dotted"
+      size = 2, linetype = "dotted"
     )
   }
   
@@ -113,7 +113,7 @@ grafica_bonita <- function(data, x, y,
     data = data_etiquetas,
     ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
     vjust = -1,
-    size = 5.5,
+    size = 6.5,
     color = "#027a35"
   )
   
@@ -124,7 +124,7 @@ grafica_bonita <- function(data, x, y,
       data = data_etiquetas_inf,
       ggplot2::aes_string(x = x, y = "inferior", label = "round(inferior, 2)"),
       vjust = 1.8,
-      size = 5.5,
+      size = 6.5,
       color = ifelse(nombre_intervalo_inferior == "Transformador", "#BC955C", "#969696")
     )
   }
@@ -136,7 +136,7 @@ grafica_bonita <- function(data, x, y,
       data = data_etiquetas_sup,
       ggplot2::aes_string(x = x, y = "superior", label = "round(superior, 2)"),
       vjust = -1.8,
-      size = 5.5,
+      size = 6.5,
       color = ifelse(nombre_intervalo_superior == "Transformador", "#BC955C", "#969696")
     )
   }
@@ -153,7 +153,7 @@ grafica_bonita <- function(data, x, y,
       p <- p + ggplot2::geom_text(
         data = data_etiqueta_base_desplazada,
         ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
-        size = 5.5,
+        size = 6.5,
         color = "#9F2241"
       )
     }
