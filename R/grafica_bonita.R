@@ -105,7 +105,7 @@ grafica_bonita <- function(data, x, y,
       text = ggplot2::element_text(size = 16, family = fuente),
       axis.text.x = ggplot2::element_text(size = 16, angle = 90),
       axis.text.y= ggplot2::element_text(size = 16),
-      legend.ticks = ggplot2::element_text(size=16),
+      legend.text = ggplot2::element_text(size=16, color="black"),
       legend.position = if (mostrar_leyenda) "right" else "none"
     )
   
