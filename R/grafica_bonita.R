@@ -103,10 +103,10 @@ grafica_bonita <- function(data, x, y,
     ggplot2::theme(
       axis.line = element_line(colour = "black"),
       plot.title = ggplot2::element_text(size = 28, face = "bold", hjust = 0),
-      text = ggplot2::element_text(size = 16, family = fuente),
-      axis.text.x = ggplot2::element_text(size = 16, angle = 90),
-      axis.text.y= ggplot2::element_text(size = 16),
-      legend.text = ggplot2::element_text(size=16, color="black"),
+      text = ggplot2::element_text(size = 18, family = fuente),
+      axis.text.x = ggplot2::element_text(size = 20, angle = 90),
+      axis.text.y= ggplot2::element_text(size = 20),
+      legend.text = ggplot2::element_text(size=20, color="black"),
       legend.position = if (mostrar_leyenda) "right" else "none"
     )
   
@@ -116,7 +116,7 @@ grafica_bonita <- function(data, x, y,
     data = data_etiquetas,
     ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
     vjust = -1,
-    size = 6.5,
+    size = 7,
     color = "#027a35",
       fontface = "bold"
   )
@@ -128,7 +128,7 @@ grafica_bonita <- function(data, x, y,
       data = data_etiquetas_inf,
       ggplot2::aes_string(x = x, y = "inferior", label = "round(inferior, 2)"),
       vjust = 1.8,
-      size = 6.5,
+      size = 7,
         fontface = "bold",
       color = ifelse(nombre_intervalo_inferior == "Transformador", "#BC955C", "#969696")
     )
@@ -141,8 +141,8 @@ grafica_bonita <- function(data, x, y,
       data = data_etiquetas_sup,
       ggplot2::aes_string(x = x, y = "superior", label = "round(superior, 2)"),
       vjust = -1.8,
-      size = 6.5,
-        fontface = "bold",
+      size = 7,
+      fontface = "bold",
       color = ifelse(nombre_intervalo_superior == "Transformador", "#BC955C", "#969696")
     )
   }
