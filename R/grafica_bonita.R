@@ -114,7 +114,8 @@ grafica_bonita <- function(data, x, y,
     ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
     vjust = -1,
     size = 6.5,
-    color = "#027a35"
+    color = "#027a35",
+      fontweight = "bold"
   )
   
   # Etiquetas: inferior
@@ -125,6 +126,7 @@ grafica_bonita <- function(data, x, y,
       ggplot2::aes_string(x = x, y = "inferior", label = "round(inferior, 2)"),
       vjust = 1.8,
       size = 6.5,
+        fontweight = "bold",
       color = ifelse(nombre_intervalo_inferior == "Transformador", "#BC955C", "#969696")
     )
   }
@@ -137,6 +139,7 @@ grafica_bonita <- function(data, x, y,
       ggplot2::aes_string(x = x, y = "superior", label = "round(superior, 2)"),
       vjust = -1.8,
       size = 6.5,
+        fontweight = "bold",
       color = ifelse(nombre_intervalo_superior == "Transformador", "#BC955C", "#969696")
     )
   }
@@ -154,7 +157,8 @@ grafica_bonita <- function(data, x, y,
         data = data_etiqueta_base_desplazada,
         ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
         size = 6.5,
-        color = "#9F2241"
+        color = "#9F2241",
+        fontweight = "bold"
       )
     }
   }
