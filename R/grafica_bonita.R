@@ -104,9 +104,10 @@ grafica_bonita <- function(data, x, y,
       axis.line = element_line(colour = "black"),
       plot.title = ggplot2::element_text(size = 28, face = "bold", hjust = 0),
       text = ggplot2::element_text(size = 18, family = fuente),
-      axis.text.x = ggplot2::element_text(size = 30, angle = 90),
-      axis.text.y= ggplot2::element_text(size = 30),
-      legend.text = ggplot2::element_text(size=30, color="black", face = "bold"),
+      axis.text.x = ggplot2::element_text(size = 25, angle = 90, face="bold"),
+      axis.text.y= ggplot2::element_text(size = 25),
+      legend.text = ggplot2::element_text(size=25, color="black"),
+      legend.title = ggplot2::element_text(size=25, face="bold", color="black"),
       legend.position = if (mostrar_leyenda) "right" else "none"
     )
   
