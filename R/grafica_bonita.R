@@ -99,7 +99,7 @@ grafica_bonita <- function(data, x, y,
     ggplot2::scale_x_continuous(breaks = sort(unique(c(seq(min(data[[x]]), max(data[[x]]), 2), 2022)))) +
     ggplot2::scale_y_continuous(limits = c(limite_inferior_y, NA)) +
     ggplot2::scale_color_manual(values = valores_color) +
-    ggplot2::theme_classic()() +
+    ggplot2::theme_classic() +
     ggplot2::theme(
       plot.title = ggplot2::element_text(size = 28, face = "bold", hjust = 0),
       text = ggplot2::element_text(size = 16, family = fuente),
