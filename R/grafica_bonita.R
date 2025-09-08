@@ -136,37 +136,31 @@ grafica_bonita <- function(data, x, y,
     )
   }
   
-  # Etiquetas: superior
-  if (mostrar_intervalo %in% c("ambos", "superior") && "superior" %in% names(data)) {
-    data_etiquetas_sup <- data[data[[x]] %in% anios_etiquetas, ]
+# Etiqueta del año base con desplazamiento (sin alterar el valor mostrado)
+if (mostrar_etiqueta_ano_base) {
+  data_etiqueta_base <- data_plot[
+    data_plot[[x]] == ano_base & 
+      data_plot$tipo_linea %in% c(nombre_observado, paste0(nombre_observado, "+")),
+  ]
+
+  if (nrow(data_etiqueta_base) > 0) {
+    data_etiqueta_base_desplazada <- data_etiqueta_base
+    # Guardar valor original para la etiqueta
+    data_etiqueta_base_desplazada$label_base <- round(data_etiqueta_base_desplazada[[y]], 2)
+    # Coordenadas solo para posición
+    data_etiqueta_base_desplazada$x_disp <- ano_base + desplazamiento_ano_base[1]
+    data_etiqueta_base_desplazada$y_disp <- data_etiqueta_base_desplazada[[y]] + desplazamiento_ano_base[2]
+
     p <- p + ggplot2::geom_text(
-      data = data_etiquetas_sup,
-      ggplot2::aes_string(x = x, y = "superior", label = "round(superior, 2)"),
-      vjust = -1.8,
+      data = data_etiqueta_base_desplazada,
+      ggplot2::aes(x = x_disp, y = y_disp, label = label_base),
+      inherit.aes = FALSE,
       size = 7.5,
-      fontface = "bold",
-      color = ifelse(nombre_intervalo_superior == "Transformador", "#BC955C", "#969696")
+      color = "#9F2241",
+      fontface = "bold"
     )
   }
-  
-  # Etiqueta del año base con desplazamiento
-  if (mostrar_etiqueta_ano_base) {
-    data_etiqueta_base <- data_plot[data_plot[[x]] == ano_base & data_plot$tipo_linea %in% c(nombre_observado, paste0(nombre_observado, "+")), ]
-    
-    if (nrow(data_etiqueta_base) > 0) {
-      data_etiqueta_base_desplazada <- data_etiqueta_base
-      data_etiqueta_base_desplazada[[x]] <- ano_base + desplazamiento_ano_base[1]
-      data_etiqueta_base_desplazada[[y]] <- data_etiqueta_base_desplazada[[y]] + desplazamiento_ano_base[2]
-      
-      p <- p + ggplot2::geom_text(
-        data = data_etiqueta_base_desplazada,
-        ggplot2::aes_string(x = x, y = y, label = sprintf("round(%s, 2)", y)),
-        size = 7.5,
-        color = "#9F2241",
-        fontface = "bold"
-      )
-    }
-  }
+}
   
   return(p)
 }
